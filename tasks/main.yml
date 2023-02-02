@@ -1,0 +1,19 @@
+# install_bash/tasks/main.yml
+
+#
+# update opkg cache on OpenWrt
+#
+- name: 'Run opkg update'
+  ansible.builtin.raw: '/bin/opkg update'
+  args:
+    executable: '/bin/ash'
+  changed_when: 'false'
+  when:
+    - ansible_distribution == "OpenWrt"
+
+#
+# install bash
+#
+- name: 'Install the bash package'
+  ansible.builtin.package:
+    name: 'bash'
