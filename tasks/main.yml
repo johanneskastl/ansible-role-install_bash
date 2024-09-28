@@ -9,7 +9,7 @@
     executable: '/bin/ash'
   changed_when: 'false'
   when:
-    - ansible_distribution == "OpenWrt"
+    - 'ansible_distribution == "OpenWrt"'
 
 #
 # install bash
@@ -17,3 +17,30 @@
 - name: 'Install the bash package'
   ansible.builtin.package:
     name: 'bash'
+  when:
+    - 'not (ansible_os_family == "RedHat" and ansible_pkg_mgr == "atomic_container")'
+    - 'not ansible_distribution == "openSUSE MicroOS"'
+    - 'not ansible_distribution == "openSUSE Leap Micro"'
+
+- name: 'Install bash on openSUSE MicroOS / openSUSE Leap Micro with a reboot'
+  community.general.zypper:
+    name: 'bash'
+    state: 'present'
+  when:
+    - '
+      ansible_distribution == "openSUSE MicroOS"
+      or ansible_distribution == "openSUSE Leap Micro"
+      '
+  notify:
+    - 'Reboot'
+    - 'Wait for the machine(s) to be ready again'
+
+- name: 'Install bash on Fedora/RedHat CoreOS with a reboot'
+  community.general.rpm_ostree_pkg:
+    name: 'bash'
+    state: 'present'
+  when:
+    - 'ansible_os_family == "RedHat" and ansible_pkg_mgr == "atomic_container"'
+  notify:
+    - 'Reboot'
+    - 'Wait for the machine(s) to be ready again'
